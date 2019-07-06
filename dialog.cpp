@@ -8,10 +8,9 @@ Dialog::Dialog(QWidget *parent) :
     ui->setupUi(this);
     //查找可用的串口
     ui->comboBox->clear();
-    ui->LED1->setStyleSheet("background:transparent;border-width:0;border-style:outset");
-    ui->LED2->setStyleSheet("background:transparent;border-width:0;border-style:outset");
-    ui->LED3->setStyleSheet("background:transparent;border-width:0;border-style:outset");
-    ui->LED4->setStyleSheet("background:transparent;border-width:0;border-style:outset");
+    ui->LED->setStyleSheet("background:transparent;border-width:0;border-style:outset");
+    ui->KEY->setStyleSheet("background:transparent;border-width:0;border-style:outset");
+    setJSVisable();
     foreach(const QSerialPortInfo &info, QSerialPortInfo::availablePorts())
     {
         QSerialPort serial;
@@ -109,6 +108,50 @@ void Dialog::on_btnClear_clicked()
     ui->textSend->clear();
 }
 
+void Dialog::setYSVisable()
+{
+    ui->fax->setVisible(false);
+    ui->fay->setVisible(false);
+    ui->faz->setVisible(false);
+    ui->fax_l->setVisible(false);
+    ui->fay_l->setVisible(false);
+    ui->faz_l->setVisible(false);
+    ui->ax->setVisible(true);
+    ui->ay->setVisible(true);
+    ui->az->setVisible(true);
+    ui->gx->setVisible(true);
+    ui->gy->setVisible(true);
+    ui->gz->setVisible(true);
+    ui->ax_l->setVisible(true);
+    ui->ay_l->setVisible(true);
+    ui->az_l->setVisible(true);
+    ui->gx_l->setVisible(true);
+    ui->gy_l->setVisible(true);
+    ui->gz_l->setVisible(true);
+}
+
+void Dialog::setJSVisable()
+{
+    ui->fax->setVisible(true);
+    ui->fay->setVisible(true);
+    ui->faz->setVisible(true);
+    ui->fax_l->setVisible(true);
+    ui->fay_l->setVisible(true);
+    ui->faz_l->setVisible(true);
+    ui->ax->setVisible(false);
+    ui->ay->setVisible(false);
+    ui->az->setVisible(false);
+    ui->gx->setVisible(false);
+    ui->gy->setVisible(false);
+    ui->gz->setVisible(false);
+    ui->ax_l->setVisible(false);
+    ui->ay_l->setVisible(false);
+    ui->az_l->setVisible(false);
+    ui->gx_l->setVisible(false);
+    ui->gy_l->setVisible(false);
+    ui->gz_l->setVisible(false);
+}
+
 bool Dialog::check_frame(QString frame_str)
 {
     QByteArray barry = frame_str.toLatin1();
@@ -142,7 +185,10 @@ void Dialog::process_frame(QString frame_str)
     int led_sta[4],btn_sta[4];
     int adval = 0,ax=0,ay=0,az=0,gx=0,gy=0,gz=0;
     double fvol =0,fpitch=0,froll=0,fyaw=0;
+    QString LED_str;
+    QString KEY_str;
     QString tstr;
+    QString tmp;
 
     if(frame_str.indexOf("7MBD")==0 && frame_str.length()>=12){
         for(i=0;i<4;i++){
@@ -151,18 +197,16 @@ void Dialog::process_frame(QString frame_str)
         for(i=0;i<4;i++){
             btn_sta[i] = (frame_str[8+i]=='U')?0:1;
         }
-        tstr.sprintf("%s%s%s%s%s%s%s%s\n",
-                     led_sta[0]?"💡":"⚪",led_sta[1]?"💡":"⚪",led_sta[2]?"💡":"⚪",led_sta[3]?"💡":"⚪",
-                     btn_sta[0]?"▁":"█",btn_sta[1]?"▁":"█",btn_sta[2]?"▁":"█",btn_sta[3]?"▁":"█");
-                     ui->LED1->setText(led_sta[0]?"💡":"⚪");
-                     ui->LED2->setText(led_sta[1]?"💡":"⚪");
-                     ui->LED3->setText(led_sta[2]?"💡":"⚪");
-                     ui->LED4->setText(led_sta[3]?"💡":"⚪");
+        LED_str.sprintf("%s   %s   %s   %s",led_sta[0]?"💡":"⚪",led_sta[1]?"💡":"⚪",led_sta[2]?"💡":"⚪",led_sta[3]?"💡":"⚪");
+        KEY_str.sprintf("%s   %s   %s   %s",btn_sta[0]?"▁":"█",btn_sta[1]?"▁":"█",btn_sta[2]?"▁":"█",btn_sta[3]?"▁":"█");
+        ui->LED->setText(LED_str);
+        ui->KEY->setText(KEY_str);
     }
     else if(frame_str.indexOf("7MY,")==0 && frame_str.length()>5){
         i=5;
         j=frame_str.indexOf(',',i);
         k=0;
+        setYSVisable();
         while(j>0&&k<6){
             switch(k){
             case 0:adval = frame_str.mid(i,j-i).toInt();break;
@@ -179,9 +223,16 @@ void Dialog::process_frame(QString frame_str)
             ++k;
         }
         if(6==k){
-            tstr.sprintf("adval=%d\nax=%d, ay=%d, az=%d\ngx=%d, gy=%d, gz=%d",
-                         adval,ax,ay,az,gx,gy,gz);
             ui->textRecv->append(tstr);
+            ui->ax->setText(QString::number(ax));
+            ui->ay->setText(QString::number(ay));
+            ui->az->setText(QString::number(az));
+            ui->gx->setText(QString::number(gx));
+            ui->gy->setText(QString::number(gy));
+            ui->gz->setText(QString::number(gz));
+            ui->ADC->setText(QString::number(adval));
+
+
         }
 
     }
@@ -189,6 +240,7 @@ void Dialog::process_frame(QString frame_str)
          i=5;
          j=frame_str.indexOf(',',i);
          k=0;
+         setJSVisable();
          while(j>0&&k<3){
              switch(k){
              case 0:fvol=frame_str.mid(i,j-i).toDouble();break;
@@ -202,9 +254,15 @@ void Dialog::process_frame(QString frame_str)
              ++k;
          }
          if(3==k){
-             tstr.sprintf("vol = %4.1f\npitch= %4.1f°, roll = %4.1f°, yaw = %4.1f°",
-                          fvol,fpitch,froll,fyaw);
-             ui->textRecv->append(tstr);
+             tmp.sprintf("%4.1f",fpitch);
+             ui->fax->setText(tmp);
+             tmp.sprintf("%4.1f",froll);
+             ui->fay->setText(tmp);
+             tmp.sprintf("%4.1f",fyaw);
+             ui->faz->setText(tmp);
+             tmp.sprintf("%4.1f",fvol);
+             ui->ADC->setText(QString::number(fvol));
+
          }
     }
 }

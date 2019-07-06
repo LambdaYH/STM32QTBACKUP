@@ -28,6 +28,8 @@ private slots:
     void on_btnClear_clicked();
 
 private:
+    void setYSVisable();
+    void setJSVisable();
     bool check_frame(QString frame_str);
     void process_frame(QString frame_str);
     Ui::Dialog *ui;
