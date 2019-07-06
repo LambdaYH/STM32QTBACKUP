@@ -10,6 +10,8 @@ Dialog::Dialog(QWidget *parent) :
     ui->comboBox->clear();
     ui->LED->setStyleSheet("background:transparent;border-width:0;border-style:outset");
     ui->KEY->setStyleSheet("background:transparent;border-width:0;border-style:outset");
+    ui->textSend->setVisible(false);
+    ui->textRecv->setVisible(false);
     setJSVisable();
     foreach(const QSerialPortInfo &info, QSerialPortInfo::availablePorts())
     {
