@@ -12,7 +12,8 @@ class Dialog;
 class Dialog : public QDialog
 {
     Q_OBJECT
-
+protected:
+    void timerEvent(QTimerEvent *event) Q_DECL_OVERRIDE;
 public:
     explicit Dialog(QWidget *parent = 0);
     ~Dialog();
